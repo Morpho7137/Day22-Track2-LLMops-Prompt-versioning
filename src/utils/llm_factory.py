@@ -103,7 +103,7 @@ def get_embeddings(provider: str = None):
     Returns:
         Embeddings instance sẵn sàng sử dụng
     """
-    provider = (provider or config.PROVIDER).lower()
+    provider = (provider or config.EMBEDDING_PROVIDER).lower()
 
     if provider in ("openai", "openrouter"):
         from langchain_openai import OpenAIEmbeddings
@@ -132,6 +132,9 @@ def get_embeddings(provider: str = None):
         )
 
     elif provider == "ollama":
+        if config.OLLAMA_EMBEDDING_MODEL.lower() in ("fake", "fake-embeddings", "dummy"):
+            from langchain_community.embeddings import FakeEmbeddings
+            return FakeEmbeddings(size=1536)
         from langchain_ollama import OllamaEmbeddings
         return OllamaEmbeddings(
             model=config.OLLAMA_EMBEDDING_MODEL,

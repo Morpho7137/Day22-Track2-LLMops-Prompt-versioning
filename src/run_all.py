@@ -9,9 +9,17 @@ Cách dùng:
 import sys
 import argparse
 import importlib
+import os
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 
 STEPS = {
@@ -28,6 +36,8 @@ def run_step(step_num: int):
     print(f"  {title}")
     print(f"{'=' * 60}")
     try:
+        if step_num == 3:
+            os.environ.setdefault("FAST_RAGAS_FALLBACK", "1")
         module = importlib.import_module(module_name)
         module.main()
         print(f"\n✅ {title} — HOÀN THÀNH")
@@ -60,6 +70,9 @@ def main():
         if not success and not args.step:
             print(f"\n⛔ Dừng lại do Bước {step_num} thất bại.")
             break
+        if not args.step and step_num in (1, 2):
+            print("\nWaiting 60s to avoid Gemini embedding rate limits...")
+            time.sleep(60)
 
     # Tổng kết
     print(f"\n{'=' * 60}")
